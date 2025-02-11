@@ -10,12 +10,22 @@
   },
   "dependencies": {
     "@prisma/client": "^6.3.1",
+    "@react-three/fiber": "^8.17.14",
     "@types/jsonwebtoken": "^9.0.8",
+    "@types/three": "^0.173.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.4.2",
     "jsonwebtoken": "^9.0.2",
+    "lucide-react": "^0.475.0",
+    "motion": "^12.4.2",
     "next": "14.2.3",
     "prisma": "^6.3.1",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "tailwind-merge": "^3.0.1",
+    "tailwindcss-animate": "^1.0.7",
+    "three": "^0.173.0"
   },
   "devDependencies": {
     "@types/node": "^20",
