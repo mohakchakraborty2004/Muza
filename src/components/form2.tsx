@@ -4,46 +4,73 @@ import { useState } from "react"
 import { CardSpotlight } from "./ui/card-spotlight"
 import { Button } from "./ui/moving-border"
 import Link from "next/link"
+import axios from "axios"
+import { useRouter } from "next/navigation"
+
+interface LoginResponse {
+  msg: string;
+  token: string;
+}
 
 export function Form() {
-    const [email, setEmail] = useState<string>("")
-    const [password, setPw] = useState<string>("")
+  const [email, setEmail] = useState<string>("")
+  const [password, setPw] = useState<string>("")
+  const navigate = useRouter()
 
-    return (
-        <div className="grid grid-cols-2 gap-10 p-28">
-            <div className="flex flex-col justify-center rounded-lg p-5 inset-0 backdrop-blur-md ">
-              <input type="email" placeholder="Spiderman@gmail.com"  className="bg-neutral-900 p-3 text-white font-semibold rounded-full m-3" />
-              <input type="password" placeholder="IamPeterParker" className="bg-neutral-900 p-3 text-white font-semibold rounded-full m-3 mb-5" />
-              <div className="flex items-center justify-center mt-2">
-              <button className="bg-white text-black font-extrabold rounded-lg p-2">Submit</button>
+  return (
+    <div className="grid grid-cols-2 gap-10 p-28">
+      <div className="flex flex-col justify-center rounded-lg p-5 inset-0 backdrop-blur-md ">
+        <input type="email" placeholder="Spiderman@gmail.com" className="bg-neutral-900 p-3 text-white font-semibold rounded-full m-3" />
+        <input type="password" placeholder="IamPeterParker" className="bg-neutral-900 p-3 text-white font-semibold rounded-full m-3 mb-5" />
+        <div className="flex items-center justify-center mt-2">
+          <button className="bg-white text-black font-extrabold rounded-lg p-2"
+            onClick={async () => {
+              try {
+                const res = await axios.post<LoginResponse>("/api/auth/signin", {
+                  data: {
+                    email,
+                    password
+                  }
+                })
 
-      <p className="text-white font-thin pl-3">Don't have an account? <Link href={'/auth/signup'}>
-      <span className="font-bold">Signup</span>
-      </Link> </p>
-            </div> 
-            </div>
+                const token = res.data.token;
+                localStorage.setItem('token', token);
+                navigate.push('/dashboard');
+              } catch (error) {
+                console.log(error);
+                alert("some error occured")
+              }
 
-              <div className="flex justify-center ">
-              <CardSpotlight className="h-96 w-96 flex flex-col justify-center">
-      <p className="text-xl font-bold relative z-20 mt-2 text-white">
-        Authentication steps
-      </p>
-      <div className="text-neutral-200 mt-4 relative z-20">
-        Follow these steps to log into your account:
-        <ul className="list-none  mt-2">
-          <Step title="Enter your email address" />
-          <Step title="Enter your password" />
-          <Step title="Restart listening" />
-        </ul>
-      </div>
-      <p className="text-neutral-300 mt-4 relative z-20 text-sm">
-        Ensuring your account is properly secured helps protect your personal
-        information and data.
-      </p>
-    </CardSpotlight>
-                </div>  
+            }}
+          >login</button>
+
+          <p className="text-white font-thin pl-3">Don't have an account? <Link href={'/auth/signup'}>
+            <span className="font-bold">Signup</span>
+          </Link> </p>
         </div>
-    )
+      </div>
+
+      <div className="flex justify-center ">
+        <CardSpotlight className="h-96 w-96 flex flex-col justify-center">
+          <p className="text-xl font-bold relative z-20 mt-2 text-white">
+            Authentication steps
+          </p>
+          <div className="text-neutral-200 mt-4 relative z-20">
+            Follow these steps to log into your account:
+            <ul className="list-none  mt-2">
+              <Step title="Enter your email address" />
+              <Step title="Enter your password" />
+              <Step title="Restart listening" />
+            </ul>
+          </div>
+          <p className="text-neutral-300 mt-4 relative z-20 text-sm">
+            Ensuring your account is properly secured helps protect your personal
+            information and data.
+          </p>
+        </CardSpotlight>
+      </div>
+    </div>
+  )
 }
 
 const Step = ({ title }: { title: string }) => {
@@ -54,7 +81,7 @@ const Step = ({ title }: { title: string }) => {
     </li>
   );
 };
- 
+
 const CheckIcon = () => {
   return (
     <svg

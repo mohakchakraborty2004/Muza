@@ -4,12 +4,18 @@ import { useState } from "react"
 import { CardSpotlight } from "./ui/card-spotlight"
 import { Button } from "./ui/moving-border"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+
+interface SignupResponse {
+  msg : string,
+  token : string
+}
 
 export function Form() {
     const [email, setEmail] = useState<string>("")
     const [username, setUsername] = useState<string>("")
     const [password, setPw] = useState<string>("")
-
+    const navigate = useRouter()
     return (
         <div className="grid grid-cols-2 gap-10 p-28">
             <div className="flex flex-col justify-center rounded-lg p-5 inset-0 backdrop-blur-md ">
@@ -17,7 +23,27 @@ export function Form() {
               <input type="text" placeholder="moChak.rs" className="bg-neutral-900 p-3 text-white font-semibold rounded-full m-3" />
               <input type="password" placeholder="IamPeterParker" className="bg-neutral-900 p-3 text-white font-semibold rounded-full m-3 mb-5" />
               <div className="flex items-center justify-center mt-2">
-              <button className="bg-white text-black font-extrabold rounded-lg p-2">Submit</button>
+              <button className="bg-white text-black font-extrabold rounded-lg p-2"
+               onClick={async () => {
+                try {
+                  const res = await axios.post<SignupResponse>("/api/auth/signin", {
+                    data: {
+                      email,
+                      username,
+                      password
+                    }
+                  })
+  
+                  const token = res.data.token;
+                  localStorage.setItem('token', token);
+                  navigate.push('/dashboard');
+                } catch (error) {
+                  console.log(error);
+                  alert("some error occured")
+                }
+  
+              }}
+              >Submit</button>
 
       <p className="text-white font-thin pl-3">Already have an account? <Link href={'/auth/signin'}>
       <span className="font-bold">Login</span>

@@ -19,7 +19,7 @@ export async function POST( req: NextRequest , res : NextResponse) {
     
         if (Exstuser) {
             alert("user Already exists") // use better popup
-            return NextResponse.redirect('/login') //create a login page
+            return NextResponse.redirect('/auth/signin') //create a login page
         }
     
         const User = await prisma.user.create({
