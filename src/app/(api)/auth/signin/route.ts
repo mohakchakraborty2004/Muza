@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/db";
 import  jwt  from "jsonwebtoken";
 
+const SECRET_KEY = process.env.JWT_SECRET as string; 
+
 export async function POST( req: NextRequest , res : NextResponse) {
     const data = await req.json()
     const {email, username, password} = data;
@@ -24,7 +26,7 @@ export async function POST( req: NextRequest , res : NextResponse) {
        const userId = Exstuser.id
 
        if (dbPassword === password) {
-        const token = jwt.sign({userId}, "secret");
+        const token = jwt.sign({userId}, SECRET_KEY);
 
         return NextResponse.json({
             msg : "account created",
