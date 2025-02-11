@@ -1,4 +1,5 @@
 "use client"
+import YouTubePlayer from '@/components/player';
 import { useParams } from 'next/navigation';
 
 export default function SpacePage() {
@@ -7,6 +8,7 @@ export default function SpacePage() {
     return (
         <div>
             <h1>Welcome to Space {spaceId}</h1>
+            <YouTubePlayer></YouTubePlayer>
         </div>
     );
 }
