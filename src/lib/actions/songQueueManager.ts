@@ -7,7 +7,7 @@ interface ISong {
 }
 
 
-class Song implements ISong {
+export class Song implements ISong {
     constructor(
         public id: string,
         public name: string,
@@ -20,7 +20,7 @@ class Song implements ISong {
     }
 }
 
-class SongQueue {
+export class SongQueue {
     private songs: Song[];
 
     constructor() {

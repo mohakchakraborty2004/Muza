@@ -1,13 +1,34 @@
 
  "use client"
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { SongQueue, Song } from "@/lib/actions/songQueueManager";
 
+//setQueue([...songQueue.getQueue()]);
 const YOUTUBE_API_KEY = "AIzaSyANTeZiA1pE8860x3pHqJoSyyl1llL68Cg";
+
+const songQueue = new SongQueue()
 
 function YouTubePlayer() {
   const [videoId, setVideoId] = useState<string>("");
   const [videoTitle, setVideoTitle] = useState<string>("");
-  const [songs, setSongs] = useState([])
+  const [songs, setSongs] = useState<Song[]>(songQueue.getQueue())
+  const [add, setAdd] = useState<boolean>(false);
+  const [url, setUrl] = useState<string>("")
+  const [NextSong, setNextSong] = useState<boolean>(false)
+
+  useEffect(()=> {
+    setSongs([...songQueue.getQueue()])
+    setAdd(false)
+  }, [add])
+
+  useEffect(()=> {
+    if(!videoId && !videoTitle){
+      return 
+    }
+    setVideoTitle(songs[0].id);
+    setVideoTitle(songs[0].name);
+   console.log("-----------------------------------------")
+  }, [NextSong])
 
   const extractVideoId = (url: string): string | null => {
     const patterns = [
@@ -60,6 +81,10 @@ function YouTubePlayer() {
         type="text"
         placeholder="Paste YouTube video URL"
         className="border p-2 mb-2 text-white bg-slate-950 w-80"
+        onChange={(e)=>{
+          handleInput(e.currentTarget.value);
+          setUrl(e.currentTarget.value);
+        }}
         onKeyDown={(e) => {
           if (e.key === "Enter") {
             handleInput(e.currentTarget.value);
@@ -68,7 +93,9 @@ function YouTubePlayer() {
       />
       <button className="bg-white text-black font-extrabold rounded-2xl px-4 ml-5" 
       onClick={()=> {
-        new Song(videoId, videoTitle, 0, Date.now())
+       const newSong = new Song(videoId, videoTitle, 0, Date.now());
+       songQueue.addSong(newSong);
+       setAdd(true);
       }}
       >Add to Queue</button>
           </div>
@@ -84,13 +111,27 @@ function YouTubePlayer() {
             title="YouTube Video Player"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
+            onEnded={()=> {
+             setNextSong(true) 
+            }}
           ></iframe>
+          <button onClick={()=> {
+            setNextSong(true);
+          }}>next song</button>
         </div>
       )}
     </div>
       
       <div>
         Queue here
+        <ul>
+    {songs.map((song, index) => (
+      <li key={index}>
+        {song.name} - Upvotes: {song.upvotes} 
+        {/* <button onClick={() => handleUpvote(song.id)}>👍 Upvote</button> */}
+      </li>
+    ))}
+  </ul>
       </div>
     </div>
   
