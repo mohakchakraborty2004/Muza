@@ -1,8 +1,11 @@
 "use client";
 import React, { useEffect, useState, useRef } from "react";
 import { SongQueue, Song } from "@/lib/actions/songQueueManager";
+import dotenv from 'dotenv';
+dotenv.config();
 
-const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
+const YOUTUBE_API_KEY = process.env.NEXT_PUBLIC_API_KEY;
+
 const songQueue = new SongQueue();
 
 function YouTubePlayer() {
