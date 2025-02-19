@@ -1,50 +1,49 @@
-
- "use client"
-import React, { useEffect, useState } from "react";
+"use client";
+import React, { useEffect, useState, useRef } from "react";
 import { SongQueue, Song } from "@/lib/actions/songQueueManager";
 
-//setQueue([...songQueue.getQueue()]);
-const YOUTUBE_API_KEY = "AIzaSyANTeZiA1pE8860x3pHqJoSyyl1llL68Cg";
-
-const songQueue = new SongQueue()
+const YOUTUBE_API_KEY = "";
+const songQueue = new SongQueue();
 
 function YouTubePlayer() {
   const [videoId, setVideoId] = useState<string>("");
   const [videoTitle, setVideoTitle] = useState<string>("");
-  const [songs, setSongs] = useState<Song[]>(songQueue.getQueue())
+  const [songs, setSongs] = useState<Song[]>(songQueue.getQueue());
   const [add, setAdd] = useState<boolean>(false);
-  const [url, setUrl] = useState<string>("")
-  const [NextSong, setNextSong] = useState<boolean>(false)
+  const [url, setUrl] = useState<string>("");
+  const [next, setNext] = useState<boolean>(false);
 
-  useEffect(()=> {
-    setSongs([...songQueue.getQueue()])
-    setAdd(false)
-  }, [add])
+  const playerRef = useRef<any>(null);
+  const apiReady = useRef<boolean>(false); // Tracks if YT API is loaded
 
-  useEffect(()=> {
-    if(!videoId && !videoTitle){
-      return 
-    }
-    setVideoTitle(songs[0].id);
-    setVideoTitle(songs[0].name);
-   console.log("-----------------------------------------")
-  }, [NextSong])
+  useEffect(() => {
+    setSongs([...songQueue.getQueue()]);
+    setAdd(false);
+  }, [add]);
 
+  useEffect(() => {
+    console.log("----------------------------------------------------------")
+    if (!videoId) return;
+    loadYouTubeAPI();
+    setNext(false);
+  }, [videoId, next]);
+
+  // Extract video ID from URL
   const extractVideoId = (url: string): string | null => {
     const patterns = [
       /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([^&]+)/,
       /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([^?]+)/,
-      /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([^?]+)/
+      /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([^?]+)/,
     ];
 
     for (const pattern of patterns) {
       const match = url.match(pattern);
       if (match) return match[1];
     }
-
     return null;
   };
 
+  // Fetch video details
   const fetchVideoDetails = async (id: string) => {
     try {
       const response = await fetch(
@@ -63,6 +62,76 @@ function YouTubePlayer() {
     }
   };
 
+  // Load YouTube API
+  const loadYouTubeAPI = () => {
+    if (typeof window === "undefined") return;
+
+    if (window.YT && window.YT.Player) {
+      apiReady.current = true;
+      createPlayer();
+    } else {
+      if (!document.getElementById("youtube-iframe-script")) {
+        const tag = document.createElement("script");
+        tag.src = "https://www.youtube.com/iframe_api";
+        tag.id = "youtube-iframe-script";
+        document.body.appendChild(tag);
+      }
+
+      // Define the global function YouTube API calls when ready
+      (window as any).onYouTubeIframeAPIReady = () => {
+        apiReady.current = true;
+        createPlayer();
+      };
+    }
+  };
+
+  // Create YouTube Player instance
+  const createPlayer = () => {
+    if (!apiReady.current || !videoId) return;
+
+    if (playerRef.current) {
+      playerRef.current.destroy();
+    }
+
+    playerRef.current = new window.YT.Player("youtube-player", {
+      videoId: videoId,
+      playerVars: {
+        autoplay: 1,
+        controls: 1,
+      },
+      events: {
+        onStateChange: onPlayerStateChange,
+      },
+    });
+  };
+
+  // Play next song when video ends
+  const onPlayerStateChange = (event: any) => {
+    if (event.data === 0) {
+      console.log("Video ended. Playing next song...");
+      console.log("hello from playNextSong")
+      const nextSong = songQueue.getQueue()[0];
+      if (nextSong) {
+        console.log(nextSong);
+        setVideoId(nextSong.id);
+        setVideoTitle(nextSong.name);
+        setNext(true);
+      }
+    }
+  };
+
+  // Play the next song in queue
+  const playNextSong = () => {
+    console.log("hello from playNextSong")
+    const nextSong = songQueue.getQueue()[0];
+    if (nextSong) {
+      console.log(nextSong);
+      setVideoId(nextSong.id);
+      setVideoTitle(nextSong.name);
+      setNext(true);
+    }
+  };
+
   const handleInput = (input: string) => {
     const extractedId = extractVideoId(input);
     if (extractedId) {
@@ -75,66 +144,53 @@ function YouTubePlayer() {
 
   return (
     <div className="grid grid-cols-2 gap-7 bg-slate-700">
-        <div className="flex flex-col items-center p-4">
-          <div className="flex justify-center">
+      <div className="flex flex-col items-center p-4">
+        <div className="flex justify-center">
           <input
-        type="text"
-        placeholder="Paste YouTube video URL"
-        className="border p-2 mb-2 text-white bg-slate-950 w-80"
-        onChange={(e)=>{
-          handleInput(e.currentTarget.value);
-          setUrl(e.currentTarget.value);
-        }}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            handleInput(e.currentTarget.value);
-          }
-        }}
-      />
-      <button className="bg-white text-black font-extrabold rounded-2xl px-4 ml-5" 
-      onClick={()=> {
-       const newSong = new Song(videoId, videoTitle, 0, Date.now());
-       songQueue.addSong(newSong);
-       setAdd(true);
-      }}
-      >Add to Queue</button>
-          </div>
-      
-      {videoId && (
-        <div className="flex flex-col items-center">
-          <h2 className="text-xl font-bold my-4">{videoTitle}</h2>
-          <iframe
-            className="mt-2"
-            width="560"
-            height="315"
-            src={`https://www.youtube.com/embed/${videoId}`}
-            title="YouTube Video Player"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            onEnded={()=> {
-             setNextSong(true) 
+            type="text"
+            placeholder="Paste YouTube video URL"
+            className="border p-2 mb-2 text-white bg-slate-950 w-80"
+            onChange={(e) => {
+              handleInput(e.currentTarget.value);
+              setUrl(e.currentTarget.value);
             }}
-          ></iframe>
-          <button onClick={()=> {
-            setNextSong(true);
-          }}>next song</button>
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleInput(e.currentTarget.value);
+              }
+            }}
+          />
+          <button
+            className="bg-white text-black font-extrabold rounded-2xl px-4 ml-5"
+            onClick={() => {
+              const newSong = new Song(videoId, videoTitle, 0, Date.now());
+              songQueue.addSong(newSong);
+              setAdd(true);
+            }}
+          >
+            Add to Queue
+          </button>
         </div>
-      )}
-    </div>
-      
+
+        {videoId && (
+          <div className="flex flex-col items-center">
+            <h2 className="text-xl font-bold my-4">{videoTitle}</h2>
+            <div id="youtube-player" className="mt-2 w-[560px] h-[315px]"></div>
+          </div>
+        )}
+      </div>
+
       <div>
-        Queue here
+        <h2>Queue</h2>
         <ul>
-    {songs.map((song, index) => (
-      <li key={index}>
-        {song.name} - Upvotes: {song.upvotes} 
-        {/* <button onClick={() => handleUpvote(song.id)}>👍 Upvote</button> */}
-      </li>
-    ))}
-  </ul>
+          {songs.map((song, index) => (
+            <li key={index}>
+              {song.name} - Upvotes: {song.upvotes}
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
-  
   );
 }
 
