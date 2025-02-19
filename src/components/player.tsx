@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { SongQueue, Song } from "@/lib/actions/songQueueManager";
 
-const YOUTUBE_API_KEY = "";
+const YOUTUBE_API_KEY = "WILL ADD IN ENV";
 const songQueue = new SongQueue();
 
 function YouTubePlayer() {
@@ -110,27 +110,19 @@ function YouTubePlayer() {
     if (event.data === 0) {
       console.log("Video ended. Playing next song...");
       console.log("hello from playNextSong")
-      const nextSong = songQueue.getQueue()[0];
+      // const nextSong = songQueue.getQueue()[0];
+      const nextSong = songQueue.getNextSong();
       if (nextSong) {
         console.log(nextSong);
         setVideoId(nextSong.id);
         setVideoTitle(nextSong.name);
         setNext(true);
+        setAdd(true);
       }
     }
   };
 
-  // Play the next song in queue
-  const playNextSong = () => {
-    console.log("hello from playNextSong")
-    const nextSong = songQueue.getQueue()[0];
-    if (nextSong) {
-      console.log(nextSong);
-      setVideoId(nextSong.id);
-      setVideoTitle(nextSong.name);
-      setNext(true);
-    }
-  };
+ 
 
   const handleInput = (input: string) => {
     const extractedId = extractVideoId(input);
@@ -186,6 +178,14 @@ function YouTubePlayer() {
           {songs.map((song, index) => (
             <li key={index}>
               {song.name} - Upvotes: {song.upvotes}
+              <button
+              onClick={()=> {
+                // take the song id 
+                // increase the particular song Id's upvote
+                songQueue.upvoteSong(song.id);
+                setAdd(true)
+              }}
+              >Upvote</button>
             </li>
           ))}
         </ul>

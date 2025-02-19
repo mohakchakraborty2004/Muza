@@ -99,6 +99,10 @@ export class SongQueue {
     }
 
     getNextSong(): Song | null {
-        return this.songs.length > 0 ? this.songs[0] : null;
+        if (this.songs.length === 0) return null; // If queue is empty, return null
+    
+        const nextSong = this.songs.shift(); // Remove and return the first song
+        return nextSong || null; // Return the song (or null if undefined)
     }
+    
 }
