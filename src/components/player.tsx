@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { SongQueue, Song } from "@/lib/actions/songQueueManager";
 
-const YOUTUBE_API_KEY = "WILL ADD IN ENV";
+const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
 const songQueue = new SongQueue();
 
 function YouTubePlayer() {
