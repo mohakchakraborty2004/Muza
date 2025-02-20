@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState, useRef } from "react";
 import { SongQueue, Song } from "@/lib/actions/songQueueManager";
+//import websocket
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -18,6 +19,39 @@ function YouTubePlayer() {
 
   const playerRef = useRef<any>(null);
   const apiReady = useRef<boolean>(false); // Tracks if YT API is loaded
+
+  useEffect(()=> {
+    
+// socket.onConnect => 
+// socket.send("joined", localstorage.token.username, )
+// 
+// 
+//  socket.onMessage => 
+// 
+// "joined" => "{username} has joined"
+//
+//
+// "added song" => const newSong = new Song(videoId, videoTitle, 0, Date.now());
+//               songQueue.addSong(newSong);
+//               setAdd(true);
+// 
+// 
+// "upvote song" =>   songQueue.upvoteSong(song.id);
+//                    setAdd(true)
+// 
+// 
+// 
+// "next song" =>  const nextSong = songQueue.getNextSong();
+// if (nextSong) {
+//   console.log(nextSong);
+//   setVideoId(nextSong.id);
+//   setVideoTitle(nextSong.name);
+//   setNext(true);
+//   setAdd(true);      
+// 
+
+     
+  }, [{/* to be decided */}])
 
   useEffect(() => {
     setSongs([...songQueue.getQueue()]);
@@ -112,8 +146,8 @@ function YouTubePlayer() {
   const onPlayerStateChange = (event: any) => {
     if (event.data === 0) {
       console.log("Video ended. Playing next song...");
+      // socket.send("next song");
       console.log("hello from playNextSong")
-      // const nextSong = songQueue.getQueue()[0];
       const nextSong = songQueue.getNextSong();
       if (nextSong) {
         console.log(nextSong);
@@ -138,13 +172,13 @@ function YouTubePlayer() {
   };
 
   return (
-    <div className="grid grid-cols-2 gap-7 bg-slate-700">
+    <div className="grid grid-cols-2 gap-7 bg-black text-white">
       <div className="flex flex-col items-center p-4">
         <div className="flex justify-center">
           <input
             type="text"
             placeholder="Paste YouTube video URL"
-            className="border p-2 mb-2 text-white bg-slate-950 w-80"
+            className="border p-2 mb-2 text-white bg-slate-800 w-80"
             onChange={(e) => {
               handleInput(e.currentTarget.value);
               setUrl(e.currentTarget.value);
@@ -161,6 +195,7 @@ function YouTubePlayer() {
               const newSong = new Song(videoId, videoTitle, 0, Date.now());
               songQueue.addSong(newSong);
               setAdd(true);
+              // socket.send ({"new song", song { videoId, videoTitle, vote = 0, date.now()} })
             }}
           >
             Add to Queue
@@ -170,16 +205,19 @@ function YouTubePlayer() {
         {videoId && (
           <div className="flex flex-col items-center">
             <h2 className="text-xl font-bold my-4">{videoTitle}</h2>
-            <div id="youtube-player" className="mt-2 w-[560px] h-[315px]"></div>
+            <div id="youtube-player" className="mt-2 w-[560px] h-[315px] rounded-xl"></div>
           </div>
         )}
       </div>
 
       <div>
         <h2>Queue</h2>
+        
         <ul>
           {songs.map((song, index) => (
+
             <li key={index}>
+
               {song.name} - Upvotes: {song.upvotes}
               <button
               onClick={()=> {
@@ -187,9 +225,13 @@ function YouTubePlayer() {
                 // increase the particular song Id's upvote
                 songQueue.upvoteSong(song.id);
                 setAdd(true)
+                // socket.send ({"upvote" , songId})
               }}
               >Upvote</button>
+
             </li>
+
+
           ))}
         </ul>
       </div>
