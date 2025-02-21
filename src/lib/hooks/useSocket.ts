@@ -6,6 +6,7 @@ export const useSocket = () => {
     const [socket, setSocket] = useState<WebSocket | null>(null);
   
     useEffect(() => {
+        if(socket) {return}
         const wss = new WebSocket( "ws://localhost:8080")
 
         wss.onopen = () => {

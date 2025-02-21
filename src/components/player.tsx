@@ -10,7 +10,7 @@ const YOUTUBE_API_KEY = process.env.NEXT_PUBLIC_API_KEY;
 
 const songQueue = new SongQueue();
 
-function YouTubePlayer() {
+function YouTubePlayer( {spaceId } : { spaceId : string | string[]} ) {
   const [videoId, setVideoId] = useState<string>("");
   const [videoTitle, setVideoTitle] = useState<string>("");
   const [songs, setSongs] = useState<Song[]>(songQueue.getQueue());
@@ -30,9 +30,10 @@ function YouTubePlayer() {
     
 
     if(!socket) { return }
-
+    console.log("socket used twice");
     socket.send(JSON.stringify({
       "action" : "join", 
+      "spaceId" : spaceId,
       "message" : "joined space"
     }))
    socket.onmessage = (event) => {
@@ -72,7 +73,7 @@ function YouTubePlayer() {
 // "joined" => "{username} has joined"  
 
   }
-  }, [, socket])
+  }, [socket])
 
   useEffect(() => {
     setSongs([...songQueue.getQueue()]);
@@ -175,7 +176,8 @@ function YouTubePlayer() {
       console.log("Video ended. Playing next song...");
        socket?.send(JSON.stringify({
         "action" : "any",
-        "message" : "next song"
+        "message" : "next song",
+        "spaceId" : spaceId
        }));
       console.log("hello from playNextSong")
       const nextSong = songQueue.getNextSong();
@@ -216,6 +218,7 @@ function YouTubePlayer() {
                socket?.send( JSON.stringify({
                 "action": "any", 
                 "message" : "link add",
+                "spaceId" : spaceId,
                 content :{
                   url : e.currentTarget.value,
                   url1 : url
@@ -239,6 +242,7 @@ function YouTubePlayer() {
               socket?.send(JSON.stringify({
                 "action" : "any",
                 "message": "added song",
+                "spaceId" : spaceId,
                 content : {
                   videoId : videoId,
                   videoTitle : videoTitle,
@@ -280,6 +284,7 @@ function YouTubePlayer() {
                 socket?.send (JSON.stringify({
                   "action" : "any",
                   "message": "upvote",
+                  "spaceId" : spaceId,
                   content : {
                   songId : song.id
                   }
