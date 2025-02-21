@@ -1,8 +1,9 @@
 "use client";
 import React, { useEffect, useState, useRef } from "react";
 import { SongQueue, Song } from "@/lib/actions/songQueueManager";
-//import websocket
+import jwt from "jsonwebtoken";
 import dotenv from 'dotenv';
+import { useSocket } from "@/lib/hooks/useSocket";
 dotenv.config();
 
 const YOUTUBE_API_KEY = process.env.NEXT_PUBLIC_API_KEY;
@@ -16,42 +17,62 @@ function YouTubePlayer() {
   const [add, setAdd] = useState<boolean>(false);
   const [url, setUrl] = useState<string>("");
   const [next, setNext] = useState<boolean>(false);
+  const [username , setUsername] = useState<string>("")
 
   const playerRef = useRef<any>(null);
   const apiReady = useRef<boolean>(false); // Tracks if YT API is loaded
 
+  const socket = useSocket();
+
+  
+
   useEffect(()=> {
     
-// socket.onConnect => 
-// socket.send("joined", localstorage.token.username, )
-// 
-// 
-//  socket.onMessage => 
-// 
-// "joined" => "{username} has joined"
-//
-//
-// "added song" => const newSong = new Song(videoId, videoTitle, 0, Date.now());
-//               songQueue.addSong(newSong);
-//               setAdd(true);
-// 
-// 
-// "upvote song" =>   songQueue.upvoteSong(song.id);
-//                    setAdd(true)
-// 
-// 
-// 
-// "next song" =>  const nextSong = songQueue.getNextSong();
-// if (nextSong) {
-//   console.log(nextSong);
-//   setVideoId(nextSong.id);
-//   setVideoTitle(nextSong.name);
-//   setNext(true);
-//   setAdd(true);      
-// 
 
-     
-  }, [{/* to be decided */}])
+    if(!socket) { return }
+
+    socket.send(JSON.stringify({
+      "action" : "join", 
+      "message" : "joined space"
+    }))
+   socket.onmessage = (event) => {
+    if (typeof event.data === "string") {
+      const parsedMessage = JSON.parse(event.data);
+
+      if (parsedMessage.message === "joined space") console.log("space joined client side");
+
+      if (parsedMessage.message === "added song"){
+           const newSong = new Song(parsedMessage.content.videoId , parsedMessage.content.videoTitle, 0, parsedMessage.content.date);              
+           songQueue.addSong(newSong);
+           setAdd(true);
+      }
+
+      if (parsedMessage.message === "upvote song") {
+        songQueue.upvoteSong(parsedMessage.content.songId);
+        setAdd(true)
+      }
+
+      if (parsedMessage.message === "link add"){
+        handleInput(parsedMessage.content.url);
+      }
+
+      if (parsedMessage.message === "next song"){
+        const nextSong = songQueue.getNextSong();
+        if (nextSong) {
+          console.log(nextSong);
+          setVideoId(nextSong.id);
+          setVideoTitle(nextSong.name);
+          setNext(true);
+          setAdd(true)
+      }
+    }
+   } 
+// socket.send("joined", localstorage.token.username, )
+
+// "joined" => "{username} has joined"  
+
+  }
+  }, [, socket])
 
   useEffect(() => {
     setSongs([...songQueue.getQueue()]);
@@ -79,6 +100,12 @@ function YouTubePlayer() {
     }
     return null;
   };
+
+  //username fetch 
+  const fetchUser = () => {
+    const token = localStorage.getItem("token");
+    
+  }
 
   // Fetch video details
   const fetchVideoDetails = async (id: string) => {
@@ -146,7 +173,10 @@ function YouTubePlayer() {
   const onPlayerStateChange = (event: any) => {
     if (event.data === 0) {
       console.log("Video ended. Playing next song...");
-      // socket.send("next song");
+       socket?.send(JSON.stringify({
+        "action" : "any",
+        "message" : "next song"
+       }));
       console.log("hello from playNextSong")
       const nextSong = songQueue.getNextSong();
       if (nextSong) {
@@ -182,6 +212,16 @@ function YouTubePlayer() {
             onChange={(e) => {
               handleInput(e.currentTarget.value);
               setUrl(e.currentTarget.value);
+
+               socket?.send( JSON.stringify({
+                "action": "any", 
+                "message" : "link add",
+                content :{
+                  url : e.currentTarget.value,
+                  url1 : url
+                }
+               }))
+
             }}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
@@ -195,7 +235,18 @@ function YouTubePlayer() {
               const newSong = new Song(videoId, videoTitle, 0, Date.now());
               songQueue.addSong(newSong);
               setAdd(true);
-              // socket.send ({"new song", song { videoId, videoTitle, vote = 0, date.now()} })
+
+              socket?.send(JSON.stringify({
+                "action" : "any",
+                "message": "added song",
+                content : {
+                  videoId : videoId,
+                  videoTitle : videoTitle,
+                  upvotes : 0,
+                  date : Date.now()
+                } 
+              }))
+
             }}
           >
             Add to Queue
@@ -225,7 +276,15 @@ function YouTubePlayer() {
                 // increase the particular song Id's upvote
                 songQueue.upvoteSong(song.id);
                 setAdd(true)
-                // socket.send ({"upvote" , songId})
+
+                socket?.send (JSON.stringify({
+                  "action" : "any",
+                  "message": "upvote",
+                  content : {
+                  songId : song.id
+                  }
+                }))
+
               }}
               >Upvote</button>
 
