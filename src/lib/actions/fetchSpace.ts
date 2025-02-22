@@ -25,7 +25,7 @@ async function fetchSpace(token : string) {
             return []
         }
 
-        return response.map(({ spaceName, id }) : Space => ({ spaceName , id })) || [];
+        return response.map(({ spaceName, id } : Space)  => ({ spaceName , id })) || [];
 
     } catch (error) {
         console.log(error)
