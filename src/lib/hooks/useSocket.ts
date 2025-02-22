@@ -1,5 +1,8 @@
 "use client";
 import { useEffect, useState } from "react"
+import dotenv from "dotenv";
+dotenv.config();
+const REDIS_URL = process.env.REDIS_URL as string
 
 export const useSocket = () => {
 
@@ -7,7 +10,7 @@ export const useSocket = () => {
   
     useEffect(() => {
         if(socket) {return}
-        const wss = new WebSocket( "ws://localhost:8080")
+        const wss = new WebSocket("https://muza-wsserver.onrender.com");
 
         wss.onopen = () => {
             console.log("socket connected");

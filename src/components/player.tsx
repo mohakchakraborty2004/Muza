@@ -10,71 +10,71 @@ const YOUTUBE_API_KEY = process.env.NEXT_PUBLIC_API_KEY;
 
 const songQueue = new SongQueue();
 
-function YouTubePlayer( {spaceId } : { spaceId : string | string[]} ) {
+function YouTubePlayer({ spaceId }: { spaceId: string | string[] }) {
   const [videoId, setVideoId] = useState<string>("");
   const [videoTitle, setVideoTitle] = useState<string>("");
   const [songs, setSongs] = useState<Song[]>(songQueue.getQueue());
   const [add, setAdd] = useState<boolean>(false);
   const [url, setUrl] = useState<string>("");
   const [next, setNext] = useState<boolean>(false);
-  const [username , setUsername] = useState<string>("")
+  const [username, setUsername] = useState<string>("")
 
   const playerRef = useRef<any>(null);
   const apiReady = useRef<boolean>(false); // Tracks if YT API is loaded
 
   const socket = useSocket();
 
-  
 
-  useEffect(()=> {
-    
 
-    if(!socket) { return }
+  useEffect(() => {
+
+
+    if (!socket) { return }
     console.log("socket used twice");
     socket.send(JSON.stringify({
-      "action" : "join", 
-      "spaceId" : spaceId,
-      "message" : "joined space"
+      "action": "join",
+      "spaceId": spaceId,
+      "message": "joined space"
     }))
-   socket.onmessage = (event) => {
-    if (typeof event.data === "string") {
-      const parsedMessage = JSON.parse(event.data);
+    socket.onmessage = (event) => {
+      if (typeof event.data === "string") {
+        const parsedMessage = JSON.parse(event.data);
 
-      if (parsedMessage.message === "joined space") console.log("space joined client side");
+        if (parsedMessage.message === "joined space") console.log("space joined client side");
 
-      if (parsedMessage.message === "added song"){
-           const newSong = new Song(parsedMessage.content.videoId , parsedMessage.content.videoTitle, 0, parsedMessage.content.date);              
-           songQueue.addSong(newSong);
-           setAdd(true);
-           console.log(songQueue.getQueue());
-      }
+        if (parsedMessage.message === "added song") {
+          const newSong = new Song(parsedMessage.content.videoId, parsedMessage.content.videoTitle, 0, parsedMessage.content.date);
+          songQueue.addSong(newSong);
+          setAdd(true);
+          console.log(songQueue.getQueue());
+        }
 
-      if (parsedMessage.message === "upvote") {
-        songQueue.upvoteSong(parsedMessage.content.songId);
-        setAdd(true)
-        console.log(songQueue.getQueue());
-      }
-
-      if (parsedMessage.message === "link add"){
-        handleInput(parsedMessage.content.url);
-      }
-
-      if (parsedMessage.message === "next song"){
-        const nextSong = songQueue.getNextSong();
-        if (nextSong) {
-          console.log(nextSong);
-          setVideoId(nextSong.id);
-          setVideoTitle(nextSong.name);
-          setNext(true);
+        if (parsedMessage.message === "upvote") {
+          songQueue.upvoteSong(parsedMessage.content.songId);
           setAdd(true)
+          console.log(songQueue.getQueue());
+        }
+
+        if (parsedMessage.message === "link add") {
+          handleInput(parsedMessage.content.url);
+        }
+
+        if (parsedMessage.message === "next song") {
+          const nextSong = songQueue.getNextSong();
+          if (nextSong) {
+            console.log(nextSong);
+            setVideoId(nextSong.id);
+            setVideoTitle(nextSong.name);
+            setNext(true);
+            setAdd(true)
+          }
+        }
       }
+      // socket.send("joined", localstorage.token.username, )
+
+      // "joined" => "{username} has joined"  
+
     }
-   } 
-// socket.send("joined", localstorage.token.username, )
-
-// "joined" => "{username} has joined"  
-
-  }
   }, [socket])
 
   useEffect(() => {
@@ -105,10 +105,10 @@ function YouTubePlayer( {spaceId } : { spaceId : string | string[]} ) {
   };
 
   //username fetch 
-  const fetchUser = () => {
-    const token = localStorage.getItem("token");
-    
-  }
+  // const fetchUser = () => {
+  //   const token = localStorage.getItem("token");
+
+  // }
 
   // Fetch video details
   const fetchVideoDetails = async (id: string) => {
@@ -144,7 +144,7 @@ function YouTubePlayer( {spaceId } : { spaceId : string | string[]} ) {
         document.body.appendChild(tag);
       }
 
-      // Define the global function YouTube API calls when ready
+      // this fn defines the global function YouTube API calls when ready
       (window as any).onYouTubeIframeAPIReady = () => {
         apiReady.current = true;
         createPlayer();
@@ -152,7 +152,7 @@ function YouTubePlayer( {spaceId } : { spaceId : string | string[]} ) {
     }
   };
 
-  // Create YouTube Player instance
+  // Creates YouTube Player instance
   const createPlayer = () => {
     if (!apiReady.current || !videoId) return;
 
@@ -176,11 +176,11 @@ function YouTubePlayer( {spaceId } : { spaceId : string | string[]} ) {
   const onPlayerStateChange = (event: any) => {
     if (event.data === 0) {
       console.log("Video ended. Playing next song...");
-       socket?.send(JSON.stringify({
-        "action" : "any",
-        "message" : "next song",
-        "spaceId" : spaceId
-       }));
+      socket?.send(JSON.stringify({
+        "action": "any",
+        "message": "next song",
+        "spaceId": spaceId
+      }));
       console.log("hello from playNextSong")
       const nextSong = songQueue.getNextSong();
       if (nextSong) {
@@ -193,7 +193,7 @@ function YouTubePlayer( {spaceId } : { spaceId : string | string[]} ) {
     }
   };
 
- 
+
 
   const handleInput = (input: string) => {
     const extractedId = extractVideoId(input);
@@ -206,7 +206,7 @@ function YouTubePlayer( {spaceId } : { spaceId : string | string[]} ) {
   };
 
   return (
-    <div className="grid grid-cols-2 gap-7 bg-black text-white">
+    <div className="grid grid-cols-2 gap-7 bg-black text-white h-[100vh]">
       <div className="flex flex-col items-center p-4">
         <div className="flex justify-center">
           <input
@@ -217,15 +217,15 @@ function YouTubePlayer( {spaceId } : { spaceId : string | string[]} ) {
               handleInput(e.currentTarget.value);
               setUrl(e.currentTarget.value);
 
-               socket?.send( JSON.stringify({
-                "action": "any", 
-                "message" : "link add",
-                "spaceId" : spaceId,
-                content :{
-                  url : e.currentTarget.value,
-                  url1 : url
+              socket?.send(JSON.stringify({
+                "action": "any",
+                "message": "link add",
+                "spaceId": spaceId,
+                content: {
+                  url: e.currentTarget.value,
+                  url1: url
                 }
-               }))
+              }))
 
             }}
             onKeyDown={(e) => {
@@ -242,15 +242,15 @@ function YouTubePlayer( {spaceId } : { spaceId : string | string[]} ) {
               setAdd(true);
 
               socket?.send(JSON.stringify({
-                "action" : "any",
+                "action": "any",
                 "message": "added song",
-                "spaceId" : spaceId,
-                content : {
-                  videoId : videoId,
-                  videoTitle : videoTitle,
-                  upvotes : 0,
-                  date : Date.now()
-                } 
+                "spaceId": spaceId,
+                content: {
+                  videoId: videoId,
+                  videoTitle: videoTitle,
+                  upvotes: 0,
+                  date: Date.now()
+                }
               }))
 
             }}
@@ -268,33 +268,40 @@ function YouTubePlayer( {spaceId } : { spaceId : string | string[]} ) {
       </div>
 
       <div>
-        <h2>Queue</h2>
-        
+        <h2 className="font-bold text-[4rem]">Queue</h2>
+
         <ul>
           {songs.map((song, index) => (
 
             <li key={index}>
+              <div className="flex flex-col mt-3 border p-5 bg-slate-950 border-violet-600 rounded-3xl  ">
+                <h1 className="text-violet-600 font-bold">
+                  {song.name}
+                </h1>
+                <h2>
+                  <span className="text-violet-600 font-semibold">- Upvotes:</span> {song.upvotes}
+                </h2>
+                <button
+                  className="text-white bg-purple-600 rounded-2xl w-[100px] p-1 mt-3 font-bold"
+                  onClick={() => {
+                    // take the song id 
+                    // increase the particular song Id's upvote
 
-              {song.name} - Upvotes: {song.upvotes}
-              <button
-              onClick={()=> {
-                // take the song id 
-                // increase the particular song Id's upvote
-                songQueue.upvoteSong(song.id);
-                setAdd(true)
+                    // songQueue.upvoteSong(song.id);
+                    // setAdd(true)
 
-                socket?.send (JSON.stringify({
-                  "action" : "any",
-                  "message": "upvote",
-                  "spaceId" : spaceId,
-                  content : {
-                  songId : song.id
-                  }
-                }))
+                    socket?.send(JSON.stringify({
+                      "action": "any",
+                      "message": "upvote",
+                      "spaceId": spaceId,
+                      content: {
+                        songId: song.id
+                      }
+                    }))
 
-              }}
-              >Upvote</button>
-
+                  }}
+                >Upvote</button>
+              </div>
             </li>
 
 

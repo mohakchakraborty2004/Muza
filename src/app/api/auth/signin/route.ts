@@ -36,7 +36,14 @@ export async function POST( req: NextRequest , res : NextResponse) {
             status: 200
         })
         
-       }
+       } 
+
+       return NextResponse.json({
+        msg : "either wrong pw or email",
+    }, {
+        status : 400
+    })
+
     
     
     } catch (error) {

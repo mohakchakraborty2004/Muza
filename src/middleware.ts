@@ -1,5 +1,6 @@
 //middleware logic here 
 // Idk if there's a need or not I can write a action as well but lets see.
+// this doesnt works but in an express backend middleware will be written like this
 
 import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';

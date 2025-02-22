@@ -5,9 +5,9 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card"
-//import type { Space } from "./page"
 import { useRouter } from "next/navigation"
 import { jwtDecode } from "jwt-decode"
+import fetchName from "@/lib/actions/fetchName"
 import fetchSpace from "@/lib/actions/fetchSpace"
 import axios from "axios"
 
@@ -24,10 +24,12 @@ interface DashboardContentProps {
   username: string
 }
 
-export function DashboardContent({ username}: DashboardContentProps) {
+export function DashboardContent() {
   const [spaces, setSpaces] = useState<space[]>([])
   const [newSpace, setNewSpace] = useState("")
   const [add, setAdd] = useState<boolean>(false)
+  const [username, setUsername] = useState<any>("John Doe")
+  const [code, setCode] = useState<any>("");
   const router = useRouter();
 
 
@@ -37,14 +39,22 @@ export function DashboardContent({ username}: DashboardContentProps) {
         const res = await fetchSpace(token!);
             setSpaces(res);
        }
+
+      //  const fetchname = async() => {
+      //   const user = await fetchName(localStorage.getItem('token')!);
+      //   setUsername(user);
+      // }
+
+      // fetchname();
+
        fetch(); 
-     }, [add]);
+     }, []);
 
 
   return (
     <div className="min-h-screen bg-black text-white p-8">
       <h1 className="text-[4rem] font-bold mb-4">
-        Welcome back, <span className="text-violet-400">{username}</span>
+        Welcome back, <span className="text-violet-400">Muzer</span>
       </h1>
       <h2 className="text-[2rem] font-semibold mb-8">
         Welcome to <span className="text-violet-400">Muza</span>
@@ -101,8 +111,13 @@ export function DashboardContent({ username}: DashboardContentProps) {
         <div>
           <h3 className="text-xl mb-4">Join a Space</h3>
           <div className="flex space-x-4">
-            <Input type="text" placeholder="Enter space code" className="bg-gray-800 text-white" />
-            <Button>Join Space</Button>
+            <Input type="text" placeholder="Enter space code" className="bg-gray-800 text-white" onChange={(e)=> {
+              setCode(e.target.value);
+            }}/>
+            <Button 
+            onClick={()=> {
+              router.push(`/space/${code}`);
+            }}>Join Space</Button>
           </div>
         </div>
       </div>
