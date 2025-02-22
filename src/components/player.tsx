@@ -46,11 +46,13 @@ function YouTubePlayer( {spaceId } : { spaceId : string | string[]} ) {
            const newSong = new Song(parsedMessage.content.videoId , parsedMessage.content.videoTitle, 0, parsedMessage.content.date);              
            songQueue.addSong(newSong);
            setAdd(true);
+           console.log(songQueue.getQueue());
       }
 
-      if (parsedMessage.message === "upvote song") {
+      if (parsedMessage.message === "upvote") {
         songQueue.upvoteSong(parsedMessage.content.songId);
         setAdd(true)
+        console.log(songQueue.getQueue());
       }
 
       if (parsedMessage.message === "link add"){

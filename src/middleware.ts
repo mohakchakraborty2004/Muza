@@ -3,8 +3,10 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
+import dotenv from "dotenv";
+dotenv.config();
 
-const SECRET_KEY = process.env.JWT_SECRET as string; 
+const SECRET_KEY = process.env.SECRET_KEY as string; 
 
 export async function middleware(req: NextRequest) {
     const authHeader = req.headers.get('authorization');

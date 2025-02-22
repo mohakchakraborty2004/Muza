@@ -1,35 +1,52 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card"
 //import type { Space } from "./page"
+import { jwtDecode } from "jwt-decode"
+import fetchSpace from "@/lib/actions/fetchSpace"
+import axios from "axios"
 
 type Space = {
-    id: string
+    id?: string
     name: string
   }
 
 interface DashboardContentProps {
   username: string
-  spaces: Space[]
 }
 
-export function DashboardContent({ username, spaces: initialSpaces }: DashboardContentProps) {
-  const [spaces, setSpaces] = useState<Space[]>(initialSpaces)
+export function DashboardContent({ username}: DashboardContentProps) {
+  const [spaces, setSpaces] = useState<Space[]>([])
   const [newSpace, setNewSpace] = useState("")
+  const [add, setAdd] = useState<boolean>(false)
 
-  const handleCreateSpace = () => {
-    if (newSpace) {
-      const newSpaceObj: Space = {
-        id: `space${spaces.length + 1}`,
-        name: newSpace,
+
+
+    useEffect(()=> {
+     
+    }, [add]);
+
+    // const fetch = async() => {
+    //   const res : Space = await fetchSpace(localStorage.getItem("token")!);
+    //   setSpaces([res]);
+    // }
+
+  const handleCreateSpace = async () => {
+     await axios.post("/api/createSpace", {
+      data : {
+        spaceName : newSpace
       }
-      setSpaces([...spaces, newSpaceObj])
-      setNewSpace("")
-    }
+    }, {
+      headers : {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`, 
+      }
+    })
+    setAdd(true)
   }
 
   return (

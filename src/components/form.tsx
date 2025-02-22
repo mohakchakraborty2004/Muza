@@ -5,6 +5,7 @@ import { CardSpotlight } from "./ui/card-spotlight"
 import { Button } from "./ui/moving-border"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import axios from "axios"
 
 interface SignupResponse {
   msg : string,
@@ -18,15 +19,22 @@ export function Form() {
     const navigate = useRouter()
     return (
         <div className="grid grid-cols-2 gap-10 p-28">
-            <div className="flex flex-col justify-center rounded-lg p-5 inset-0 backdrop-blur-md ">
-              <input type="email" placeholder="Spiderman@gmail.com"  className="bg-neutral-900 p-3 text-white font-semibold rounded-full m-3" />
-              <input type="text" placeholder="moChak.rs" className="bg-neutral-900 p-3 text-white font-semibold rounded-full m-3" />
-              <input type="password" placeholder="IamPeterParker" className="bg-neutral-900 p-3 text-white font-semibold rounded-full m-3 mb-5" />
+            <div className="flex flex-col justify-center rounded-lg p-5 inset-0 backdrop-blur-md" >
+              <input type="email" placeholder="Spiderman@gmail.com"  className="bg-neutral-900 p-3 text-white font-semibold rounded-full m-3" onChange={(e: any)=> {
+                setEmail(e.target.value);
+              }}/>
+              <input type="text" placeholder="moChak.rs" className="bg-neutral-900 p-3 text-white font-semibold rounded-full m-3" onChange={(e: any)=> {
+                setUsername(e.target.value);
+              }}/>
+              <input type="password" placeholder="IamPeterParker" className="bg-neutral-900 p-3 text-white font-semibold rounded-full m-3 mb-5" onChange={(e: any)=> {
+                setPw(e.target.value);
+              }}/>
               <div className="flex items-center justify-center mt-2">
               <button className="bg-white text-black font-extrabold rounded-lg p-2"
                onClick={async () => {
+                console.log("clicked");
                 try {
-                  const res = await axios.post<SignupResponse>("/api/auth/signin", {
+                  const res = await axios.post<SignupResponse>("http://localhost:3000/api/auth/signup", {
                     data: {
                       email,
                       username,
