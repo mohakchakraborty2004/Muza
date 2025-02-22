@@ -5,6 +5,10 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const SECRET_KEY = process.env.SECRET_KEY as string;
+type Space = {
+    spaceName: string;
+    id: string;
+  };
 
 async function fetchSpace(token : string) {
     const msg = "no spaces created"
@@ -21,7 +25,7 @@ async function fetchSpace(token : string) {
             return []
         }
 
-        return response.map(({ spaceName, id }) => ({ spaceName , id })) || [];
+        return response.map(({ spaceName, id }) : Space => ({ spaceName , id })) || [];
 
     } catch (error) {
         console.log(error)
