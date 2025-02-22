@@ -6,55 +6,47 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card"
 //import type { Space } from "./page"
+import { useRouter } from "next/navigation"
 import { jwtDecode } from "jwt-decode"
 import fetchSpace from "@/lib/actions/fetchSpace"
 import axios from "axios"
 
-type Space = {
+type space = {
     id?: string
-    name: string
+    spaceName: string
   }
+
+interface res {
+  spaceId : any
+}
 
 interface DashboardContentProps {
   username: string
 }
 
 export function DashboardContent({ username}: DashboardContentProps) {
-  const [spaces, setSpaces] = useState<Space[]>([])
+  const [spaces, setSpaces] = useState<space[]>([])
   const [newSpace, setNewSpace] = useState("")
   const [add, setAdd] = useState<boolean>(false)
+  const router = useRouter();
 
 
+     useEffect(()=> {
+       const fetch = async() => {
+        const token = localStorage.getItem('token');
+        const res = await fetchSpace(token!);
+            setSpaces(res);
+       }
+       fetch(); 
+     }, [add]);
 
-    useEffect(()=> {
-     
-    }, [add]);
-
-    // const fetch = async() => {
-    //   const res : Space = await fetchSpace(localStorage.getItem("token")!);
-    //   setSpaces([res]);
-    // }
-
-  const handleCreateSpace = async () => {
-     await axios.post("/api/createSpace", {
-      data : {
-        spaceName : newSpace
-      }
-    }, {
-      headers : {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`, 
-      }
-    })
-    setAdd(true)
-  }
 
   return (
     <div className="min-h-screen bg-black text-white p-8">
-      <h1 className="text-4xl font-bold mb-4">
+      <h1 className="text-[4rem] font-bold mb-4">
         Welcome back, <span className="text-violet-400">{username}</span>
       </h1>
-      <h2 className="text-2xl mb-8">
+      <h2 className="text-[2rem] font-semibold mb-8">
         Welcome to <span className="text-violet-400">Muza</span>
       </h2>
 
@@ -69,24 +61,36 @@ export function DashboardContent({ username}: DashboardContentProps) {
               onChange={(e) => setNewSpace(e.target.value)}
               className="bg-gray-800 text-white"
             />
-            <Button onClick={handleCreateSpace}>Create Space</Button>
+            <Button onClick={async () => {
+   const res = await axios.post<res>("/api/createSpace", {
+        name : newSpace
+    }, {
+      headers : {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`, 
+      }
+    })
+    const space = res.data.spaceId;
+    router.push(`/space/${space}`);
+    setAdd(true)
+  }}>Create Space</Button>
           </div>
         </div>
 
         <div>
-          <h3 className="text-xl mb-4">Your Spaces</h3>
+          <h3 className="text-2xl mb-4 font-bold">Your Spaces</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {spaces.map((space) => (
-              <Card key={space.id} className="bg-gray-800">
+              <Card key={space.id} className="bg-slate-900">
                 <CardHeader>
-                  <CardTitle>{space.name}</CardTitle>
+                  <CardTitle className="text-violet-500">{space.spaceName}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p>Space ID: {space.id}</p>
+                  <p className="text-white"><span className="text-violet-500 font-bold">Space ID: </span>{space.id}</p>
                 </CardContent>
                 <CardFooter>
                   <Link href={`/space/${space.id}`} passHref>
-                    <Button>Join Space</Button>
+                    <Button className="bg-violet-700">Join Space</Button>
                   </Link>
                 </CardFooter>
               </Card>

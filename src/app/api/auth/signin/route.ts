@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/db";
 import  jwt  from "jsonwebtoken";
-
-const SECRET_KEY = process.env.JWT_SECRET as string; 
+import dotenv from "dotenv";
+dotenv.config();
+const SECRET_KEY = process.env.SECRET_KEY as string; 
 
 export async function POST( req: NextRequest , res : NextResponse) {
     const data = await req.json()

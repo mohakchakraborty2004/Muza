@@ -20,17 +20,25 @@ export function Form() {
   return (
     <div className="grid grid-cols-2 gap-10 p-28">
       <div className="flex flex-col justify-center rounded-lg p-5 inset-0 backdrop-blur-md ">
-        <input type="email" placeholder="Spiderman@gmail.com" className="bg-neutral-900 p-3 text-white font-semibold rounded-full m-3" />
-        <input type="password" placeholder="IamPeterParker" className="bg-neutral-900 p-3 text-white font-semibold rounded-full m-3 mb-5" />
+        <input type="email" placeholder="Spiderman@gmail.com" className="bg-neutral-900 p-3 text-white font-semibold rounded-full m-3" onChange={(e:any)=>{
+          setEmail(e.target.value)
+        }} />
+        <input type="password" placeholder="IamPeterParker" className="bg-neutral-900 p-3 text-white font-semibold rounded-full m-3 mb-5" onChange={(e:any)=>{
+          setPw(e.target.value)
+        }} />
         <div className="flex items-center justify-center mt-2">
           <button className="bg-white text-black font-extrabold rounded-lg p-2"
             onClick={async () => {
               try {
                 const res = await axios.post<LoginResponse>("/api/auth/signin", {
-                  data: {
+                
                     email,
                     password
-                  }
+                  
+                }, {
+                  headers: {
+                    "Content-Type": "application/json"
+                }
                 })
 
                 const token = res.data.token;

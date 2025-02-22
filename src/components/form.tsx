@@ -33,13 +33,20 @@ export function Form() {
               <button className="bg-white text-black font-extrabold rounded-lg p-2"
                onClick={async () => {
                 console.log("clicked");
+                console.log("Email:", email);
+                console.log("Username:", username);
+                console.log("Password:", password);
                 try {
-                  const res = await axios.post<SignupResponse>("http://localhost:3000/api/auth/signup", {
-                    data: {
-                      email,
-                      username,
-                      password
-                    }
+                  const res = await axios.post<SignupResponse>("/api/auth/signup", 
+                    {
+                    email :  email,
+                    username :  username,
+                    password : password
+                    } 
+                   , {
+                    headers: {
+                      "Content-Type": "application/json"
+                  }
                   })
   
                   const token = res.data.token;

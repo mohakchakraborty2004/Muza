@@ -7,7 +7,7 @@ dotenv.config();
 const SECRET_KEY = process.env.SECRET_KEY as string;
 
 async function fetchSpace(token : string) {
-    
+    const msg = "no spaces created"
     try {
         const decoded = jwt.verify(token,SECRET_KEY) as  {userId : string} ;
         const userId = decoded.userId 
@@ -17,10 +17,15 @@ async function fetchSpace(token : string) {
             }
         })
 
-        return response.map(({ spaceName, id }) => ({ spaceName , id }));
+        if (!response) {
+            return []
+        }
+
+        return response.map(({ spaceName, id }) => ({ spaceName , id })) || [];
 
     } catch (error) {
         console.log(error)
+        return [] ;
     }
 }
 
