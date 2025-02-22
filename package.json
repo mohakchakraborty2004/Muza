@@ -6,8 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "postinstall": "cd src/app/db/prisma && npx prisma generate"
+    "lint": "next lint"
   },
   "dependencies": {
     "@prisma/client": "^6.3.1",
